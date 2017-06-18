@@ -6,4 +6,6 @@
   :dependencies [[org.clojure/clojure "1.8.0"]]
   :main ^:skip-aot a2-clojure-todo-app.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all}
+             :dev {:dependencies [[alembic "0.3.2"]]}})
+
