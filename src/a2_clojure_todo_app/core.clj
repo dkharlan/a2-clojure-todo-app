@@ -6,31 +6,58 @@
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [ring.adapter.jetty :refer [run-jetty]]))
 
-(defn index []
+(defn page [body]
   [:html
    [:head
     [:title "To Do"]]
-   [:body
-    [:p "Hello, world!"]]])
+   [:body body]])
+
+(defn render-page [body]
+  (-> body
+    (page)
+    (html)))
+
+(defn todo-list [items]
+  [:div
+   [:ul
+    (for [item items]
+      [:li item])]])
+
+(defn index [items]
+  (render-page
+    [:div {:id ""}
+     (if (> (count items) 0)
+       (todo-list items)
+       [:p "You have nothing to do."])]))
 
 (defn not-found []
-  [:html
-   [:head
-    [:title "Not Found"]]
-   [:body
-    [:p "Sorry, the page you're looking for does not exist."]]])
+  (render-page
+    [:p "Sorry, the page you're looking for does not exist."]))
 
-(defroutes app-routes
-  (GET "/" [] (html (index)))
-  (route/not-found (html (not-found))))
+(defn make-routes [state!]
+  (routes
+    (GET "/" [] (index (get @state! :items)))
+    (route/not-found (not-found))))
 
-(def app (wrap-defaults app-routes site-defaults))
+(defn make-app [routes]
+  (-> routes
+    (wrap-defaults site-defaults)))
 
-(defn run! [app port]
-  (run-jetty app {:port port :join? false}))
+(defn run-app!
+  ([app port]
+   (run-app! app port false))
+  ([app port join?]
+   (run-jetty app {:port port :join? join?})))
+
+(def initial-state
+  {:items []})
 
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
-  (println "Hello, World!"))
+  (let [state! (atom initial-state)]
+    (-> state!
+      (make-routes)
+      (make-app)
+      (run-app! 8080 true) ;; in the REPL use false to prevent the REPL from blocking
+      )))
 
