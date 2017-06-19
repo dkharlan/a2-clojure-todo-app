@@ -30,11 +30,14 @@
 
 (defn index [items]
   (render-page
-    [:div {:id ""}
-     (if (> (count items) 0)
-       (todo-list items)
-       [:p "You have nothing to do."])
-     (new-item-form)]))
+    [:div
+     [:div
+      (if (> (count items) 0)
+        (todo-list items)
+        [:p "You have nothing to do."])
+      (new-item-form)]
+     [:div
+      [:img {:src "/images/logo.png"}]]]))
 
 (defn not-found []
   (render-page
