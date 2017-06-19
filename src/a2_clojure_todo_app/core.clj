@@ -5,6 +5,7 @@
             [hiccup.core :refer [html]]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [ring.util.response :refer [redirect]]
+            [ring.util.anti-forgery :refer [anti-forgery-field]]
             [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn page [body]
@@ -26,12 +27,20 @@
        [:span item-description "&nbsp;"]
        [:a {:href (str "/item/" item-id "/delete")} "Delete"]])]])
 
+(defn new-item-form []
+  [:div
+   [:form {:action "/item/create" :method "post"}
+    (anti-forgery-field)
+    [:input {:type "text" :name "description" :required true}]
+    [:button "Create"]]])
+
 (defn index [items]
   (render-page
     [:div {:id ""}
      (if (> (count items) 0)
        (todo-list items)
-       [:p "You have nothing to do."])]))
+       [:p "You have nothing to do."])
+     (new-item-form)]))
 
 (defn not-found []
   (render-page
@@ -45,6 +54,13 @@
       (do
         (swap! state! update-in [:items] dissoc (Integer/parseInt item-id))
         (redirect "/")))
+    (POST "/item/create" [description]
+      (swap! state!
+        #(let [{:keys [next-id] :as state} %]
+           (-> state
+             (assoc-in [:items next-id] description)
+             (update-in [:next-id] inc))))
+      (redirect "/"))
     (route/not-found (not-found))))
 
 (defn make-app [routes]
