@@ -4,6 +4,7 @@
             [compojure.route :as route]
             [hiccup.core :refer [html]]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [ring.util.response :refer [redirect]]
             [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn page [body]
@@ -20,8 +21,10 @@
 (defn todo-list [items]
   [:div
    [:ul
-    (for [item items]
-      [:li item])]])
+    (for [[item-id item-description] items]
+      [:li
+       [:span item-description "&nbsp;"]
+       [:a {:href (str "/item/" item-id "/delete")} "Delete"]])]])
 
 (defn index [items]
   (render-page
@@ -36,7 +39,12 @@
 
 (defn make-routes [state!]
   (routes
-    (GET "/" [] (index (get @state! :items)))
+    (GET "/" []
+      (index (get @state! :items)))
+    (GET "/item/:item-id/delete" [item-id]
+      (do
+        (swap! state! update-in [:items] dissoc (Integer/parseInt item-id))
+        (redirect "/")))
     (route/not-found (not-found))))
 
 (defn make-app [routes]
@@ -50,7 +58,14 @@
    (run-jetty app {:port port :join? join?})))
 
 (def initial-state
-  {:items []})
+  {:items {}
+   :next-id 0})
+
+(def test-state
+  {:items {0 "Walk the dog"
+           1 "Go to work"
+           2 "Go shopping"}
+   :next-id 2})
 
 (defn -main
   [& args]
