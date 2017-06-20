@@ -1,7 +1,7 @@
 # a2-clojure-todo-app
 
 This is a simple to-do list to demonstrate web development concepts for a A2 Clojure
-meetup. Check out the commit history for a blow-by-blow explanation.
+meetup. Check out the commit history for a blow-by-blow explanation, and see [here for the slides](https://goo.gl/egsZjR).
 
 ## Usage
 
