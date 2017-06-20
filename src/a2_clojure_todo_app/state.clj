@@ -8,7 +8,7 @@
   {:items {0 "Walk the dog"
            1 "Go to work"
            2 "Go shopping"}
-   :next-id 2})
+   :next-id 3})
 
 (defn delete-item [state item-id]
   (update-in state [:items] dissoc item-id))
